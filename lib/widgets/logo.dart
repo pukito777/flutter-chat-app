@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 class Logo extends StatelessWidget {
   final String titulo;
-
   const Logo({super.key, required this.titulo});
 
   @override

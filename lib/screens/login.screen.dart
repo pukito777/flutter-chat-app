@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+
+import 'package:chat/services/auth_service.dart';
 import 'package:chat/widgets/widgets.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color(0xffF2F2F2),
+        backgroundColor: Color(0xffF2F2F2),
         body: SafeArea(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -20,10 +23,9 @@ class LoginScreen extends StatelessWidget {
                   ),
                   _Form(),
                   Labels(
-                    titulo: '¿No tienes cuenta?',
-                    subtitulo: '¡Crea una ahora!',
-                    ruta: 'register',
-                  ),
+                      titulo: '¿No tienes cuenta?',
+                      subtitulo: '¡Crea una ahora!',
+                      ruta: 'register'),
                   Text('Términos y condiciones de uso',
                       style: TextStyle(fontWeight: FontWeight.w200))
                 ],
@@ -65,10 +67,13 @@ class __FormState extends State<_Form> {
             isPassword: true,
           ),
           BotonAzul(
-            text: 'Ingrese',
+            texto: 'Ingrese',
             onPressed: () {
               print(emailController);
               print(passController);
+              final authService =
+                  Provider.of<AuthService>(context, listen: false);
+              authService.login(emailController.text, passController.text);
             },
           )
         ],

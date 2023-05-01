@@ -6,12 +6,12 @@ class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color(0xffF2F2F2),
+        backgroundColor: Color(0xffF2F2F2),
         body: SafeArea(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: SizedBox(
-              height: MediaQuery.of(context).size.height * .9,
+              height: MediaQuery.of(context).size.height * .99,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const <Widget>[
@@ -20,10 +20,9 @@ class RegisterScreen extends StatelessWidget {
                   ),
                   _Form(),
                   Labels(
-                    titulo: '¿Ya tienes una cuenta?',
-                    subtitulo: '¡Ingresa ahora!',
-                    ruta: 'login',
-                  ),
+                      titulo: '¿Ya tienes una cuenta?',
+                      subtitulo: '¡Ingresa ahora!',
+                      ruta: 'login'),
                   Text('Términos y condiciones de uso',
                       style: TextStyle(fontWeight: FontWeight.w200))
                 ],
@@ -42,8 +41,8 @@ class _Form extends StatefulWidget {
 }
 
 final nameController = TextEditingController();
-final _emailController = TextEditingController();
-final _passController = TextEditingController();
+final correoController = TextEditingController();
+final passwordController = TextEditingController();
 
 class __FormState extends State<_Form> {
   @override
@@ -63,19 +62,19 @@ class __FormState extends State<_Form> {
             icon: Icons.mail_outline,
             placeholder: 'Correo',
             keyboardType: TextInputType.emailAddress,
-            textController: _emailController,
+            textController: correoController,
           ),
           CustomInput(
             icon: Icons.lock_outline,
             placeholder: 'Contraseña',
-            textController: _passController,
+            textController: passwordController,
             isPassword: true,
           ),
           BotonAzul(
-            text: 'Ingrese',
+            texto: 'Ingrese',
             onPressed: () {
-              print(_emailController);
-              print(_passController);
+              // print(emailController);
+              // print(passController);
             },
           )
         ],
