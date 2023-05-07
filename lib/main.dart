@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       providers: [ChangeNotifierProvider(create: (_) => AuthService())],
       child: MaterialApp(
         title: 'Chat App',
-        initialRoute: 'login',
+        initialRoute: 'loading',
         routes: appRoutes,
         theme: ThemeData(useMaterial3: true),
       ),

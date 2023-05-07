@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-import 'package:chat/models/usuario.dart';
+import 'package:chat/models/models.dart';
+import 'package:chat/services/auth_service.dart';
 
 class UsuariosScreen extends StatefulWidget {
   @override
@@ -13,21 +15,25 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
   final usuarios = [
-    Usuario(uid: '1', nombre: 'María', email: 'test1@test.com', online: true),
-    Usuario(
+    UsuarioModel(
+        uid: '1', nombre: 'María', email: 'test1@test.com', online: true),
+    UsuarioModel(
         uid: '2', nombre: 'Melissa', email: 'test2@test.com', online: false),
-    Usuario(
+    UsuarioModel(
         uid: '3', nombre: 'Fernando', email: 'test3@test.com', online: true),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+    final usuario = authService.usuario;
+
     return Scaffold(
         appBar: AppBar(
-          title: const Center(
+          title: Center(
             child: Text(
-              'Mi nombre',
-              style: TextStyle(color: Colors.black87),
+              usuario.nombre,
+              style: const TextStyle(color: Colors.black87),
               textAlign: TextAlign.center,
             ),
           ),
@@ -38,7 +44,11 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
               Icons.exit_to_app,
               color: Colors.black87,
             ),
-            onPressed: () {},
+            onPressed: () {
+              //TODO: Desconectar el socket server
+              Navigator.pushReplacementNamed(context, 'login');
+              AuthService.deleteToken();
+            },
           ),
           actions: <Widget>[
             Container(
@@ -79,7 +89,7 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
         itemCount: usuarios.length);
   }
 
-  ListTile _usuarioListTile(Usuario usuario) {
+  ListTile _usuarioListTile(UsuarioModel usuario) {
     return ListTile(
       title: Text(usuario.nombre),
       subtitle: Text(usuario.email),

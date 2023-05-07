@@ -5,10 +5,9 @@ class BotonAzul extends StatelessWidget {
   final Function() onPressed;
 
   const BotonAzul({super.key, required this.texto, required this.onPressed});
-  
-  @override
-  Widget build(BuildContext context) {    
 
+  @override
+  Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
           elevation: 2,
@@ -18,7 +17,9 @@ class BotonAzul extends StatelessWidget {
       child: SizedBox(
           width: double.infinity,
           height: 55,
-          child: Center(child: Text(texto,
+          child: Center(
+              child: Text(
+            texto,
             style: const TextStyle(color: Colors.white, fontSize: 17),
           ))),
     );

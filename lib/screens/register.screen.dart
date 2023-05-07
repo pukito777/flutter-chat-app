@@ -1,12 +1,18 @@
+import 'package:chat/helpers/mostrar_alerta.helper.dart';
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+
+import 'package:chat/services/auth_service.dart';
+
+import 'package:chat/screens/screens.dart';
 import 'package:chat/widgets/widgets.dart';
 
 class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xffF2F2F2),
+        backgroundColor: const Color(0xffF2F2F2),
         body: SafeArea(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -47,6 +53,7 @@ final passwordController = TextEditingController();
 class __FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
     return Container(
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.symmetric(horizontal: 50),
@@ -71,12 +78,22 @@ class __FormState extends State<_Form> {
             isPassword: true,
           ),
           BotonAzul(
-            texto: 'Ingrese',
-            onPressed: () {
-              // print(emailController);
-              // print(passController);
-            },
-          )
+              texto: 'Crear Cuenta',
+              onPressed: authService.autenticando
+                  ? () => Null
+                  : () async {
+                      final registroOk = await authService.register(
+                          nameController.text.trim(),
+                          correoController.text.trim(),
+                          passwordController.text.trim());
+                      if (registroOk == true) {
+                        //TODO conectar al socket server
+                        Navigator.pushReplacementNamed(context, 'usuarios');
+                      } else {
+                        mostrarAlerta(
+                            context, 'Registro incorrecto', registroOk);
+                      }
+                    })
         ],
       ),
     );

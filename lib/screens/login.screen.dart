@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
+import 'package:chat/helpers/mostrar_alerta.helper.dart';
 import 'package:chat/services/auth_service.dart';
 import 'package:chat/widgets/widgets.dart';
 
@@ -49,6 +50,8 @@ final passController = TextEditingController();
 class __FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.symmetric(horizontal: 50),
@@ -67,15 +70,23 @@ class __FormState extends State<_Form> {
             isPassword: true,
           ),
           BotonAzul(
-            texto: 'Ingrese',
-            onPressed: () {
-              print(emailController);
-              print(passController);
-              final authService =
-                  Provider.of<AuthService>(context, listen: false);
-              authService.login(emailController.text, passController.text);
-            },
-          )
+              texto: 'Ingrese',
+              onPressed: authService.autenticando
+                  ? () => Null
+                  : () async {
+                      FocusScope.of(context).unfocus();
+                      final loginOk = await authService.login(
+                          emailController.text, passController.text);
+
+                      if (loginOk) {
+                        //TODO: Conectar a nuestro socket server
+                        Navigator.pushReplacementNamed(context, 'usuarios');
+                      } else {
+                        //Mostrar alerta
+                        mostrarAlerta(context, 'Login incorrecto',
+                            'Revise sus crendenciales nuevamente');
+                      }
+                    }),
         ],
       ),
     );
