@@ -1,11 +1,9 @@
-import 'package:chat/helpers/mostrar_alerta.helper.dart';
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
 
-import 'package:chat/services/auth_service.dart';
+import 'package:chat/services/services.dart';
 
-import 'package:chat/screens/screens.dart';
+import 'package:chat/helpers/mostrar_alerta.helper.dart';
 import 'package:chat/widgets/widgets.dart';
 
 class RegisterScreen extends StatelessWidget {
@@ -54,6 +52,8 @@ class __FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
+    final socketService = Provider.of<SocketService>(context);
+
     return Container(
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.symmetric(horizontal: 50),
@@ -87,7 +87,7 @@ class __FormState extends State<_Form> {
                           correoController.text.trim(),
                           passwordController.text.trim());
                       if (registroOk == true) {
-                        //TODO conectar al socket server
+                        socketService.connect();
                         Navigator.pushReplacementNamed(context, 'usuarios');
                       } else {
                         mostrarAlerta(

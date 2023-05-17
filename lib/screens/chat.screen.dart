@@ -2,7 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'package:chat/services/services.dart';
+
+import 'package:chat/models/models.dart';
 import 'package:chat/widgets/widgets.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -14,57 +18,101 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
 
+  late ChatService chatService;
+  late SocketService socketService;
+  late AuthService authService;
+
   List<ChatMessage> _messages = [];
 
   bool _isWriting = false;
 
   @override
+  void initState() {
+    super.initState();
+    //No se puede redibujar en initState por eso listen es falso
+    chatService = Provider.of<ChatService>(context, listen: false);
+    socketService = Provider.of<SocketService>(context, listen: false);
+    authService = Provider.of<AuthService>(context, listen: false);
+
+    socketService.socket.on('mensaje-personal', _escucharMensaje);
+
+    _cargarHistorial(chatService.usuarioDestino.uid);
+  }
+
+  void _cargarHistorial(String usuarioID) async {
+    List<Mensaje> chat = await chatService.getChat(usuarioID);
+    final history = chat.map((m) => ChatMessage(
+        texto: m.mensaje,
+        uid: m.origen,
+        animationController: AnimationController(
+            vsync: this, duration: const Duration(milliseconds: 0))
+          ..forward()));
+
+    setState(() {
+      _messages.insertAll(0, history);
+    });
+  }
+
+  void _escucharMensaje(dynamic payload) {
+    ChatMessage message = ChatMessage(
+        texto: payload['mensaje'],
+        uid: payload['origen'],
+        animationController: AnimationController(
+            vsync: this, duration: const Duration(milliseconds: 300)));
+    setState(() {
+      _messages.insert(0, message);
+    });
+
+    message.animationController.forward();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final usuarioDestino = chatService.usuarioDestino;
+
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          title: Column(children: const <Widget>[
+          title: Column(children: <Widget>[
             CircleAvatar(
-              backgroundColor: Color.fromARGB(255, 187, 222, 251),
+              backgroundColor: const Color.fromARGB(255, 187, 222, 251),
               maxRadius: 14,
               child: Center(
                 child: Text(
-                  'Te',
-                  style: TextStyle(fontSize: 12),
+                  usuarioDestino.nombre.substring(0, 2),
+                  style: const TextStyle(fontSize: 12),
                   textAlign: TextAlign.center,
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 3,
             ),
             Text(
-              'Melissa Flores',
-              style: TextStyle(color: Colors.black87, fontSize: 12),
+              usuarioDestino.nombre,
+              style: const TextStyle(color: Colors.black87, fontSize: 12),
             )
           ]),
           centerTitle: true,
           elevation: 1,
         ),
-        body: Container(
-          child: Column(children: <Widget>[
-            Flexible(
-                child: ListView.builder(
-              physics: const BouncingScrollPhysics(),
-              itemCount: _messages.length,
-              itemBuilder: (_, i) => _messages[i],
-              reverse: true,
-            )),
-            const Divider(
-              height: 1,
-            ),
-            //TODO: Caja de texto
-            Container(
-              color: Colors.white,
-              child: _inputChat(),
-            )
-          ]),
-        ));
+        body: Column(children: <Widget>[
+          Flexible(
+              child: ListView.builder(
+            physics: const BouncingScrollPhysics(),
+            itemCount: _messages.length,
+            itemBuilder: (_, i) => _messages[i],
+            reverse: true,
+          )),
+          const Divider(
+            height: 1,
+          ),
+          //TODO: Caja de texto
+          Container(
+            color: Colors.white,
+            child: _inputChat(),
+          )
+        ]));
   }
 
   Widget _inputChat() {
@@ -122,11 +170,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   _handleSubmit(String texto) {
     if (texto.isEmpty) return;
-    print(texto);
+
     _textController.clear();
     _focusNode.requestFocus();
+
     final newMessage = ChatMessage(
-      uid: '123',
+      uid: authService.usuario.uid,
       texto: texto,
       animationController: AnimationController(
           vsync: this, duration: const Duration(milliseconds: 400)),
@@ -136,14 +185,22 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     setState(() {
       _isWriting = false;
     });
+
+    socketService.emit('mensaje-personal', {
+      'origen': authService.usuario.uid,
+      'destino': chatService.usuarioDestino.uid,
+      'mensaje': texto
+    });
   }
 
   @override
   void dispose() {
-    //TODO Off del socket
     for (ChatMessage message in _messages) {
       message.animationController.dispose();
     }
+    socketService.socket.off(
+      'mensaje-personal',
+    );
     super.dispose();
   }
 }
